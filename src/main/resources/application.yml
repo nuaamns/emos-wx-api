@@ -65,3 +65,7 @@ emos:
     secret: abc123456
     expire: 5
     cache-expire: 10
+
+wx:
+  app-id: wx8e7bac0554969f0f
+  app-secret: 2b06a9f6a1c7c2372061c1232e092dd2
