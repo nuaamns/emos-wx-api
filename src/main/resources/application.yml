@@ -67,5 +67,5 @@ emos:
     cache-expire: 10
 
 wx:
-  app-id: appid
-  app-secret: secret
+  app-id: appaaaid
+  app-secret: appaaasecret

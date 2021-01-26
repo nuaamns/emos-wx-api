@@ -27,7 +27,7 @@ public class SysConfig implements Serializable {
     /**
      * 状态
      */
-    private Boolean status;
+    private Byte status;
 
     /**
      * 备注

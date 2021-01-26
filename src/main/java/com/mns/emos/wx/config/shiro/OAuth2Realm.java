@@ -1,9 +1,8 @@
 package com.mns.emos.wx.config.shiro;
 
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import com.mns.emos.wx.db.pojo.TbUser;
+import com.mns.emos.wx.service.UserService;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -11,11 +10,16 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 @Component
 public class OAuth2Realm extends AuthorizingRealm {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -24,24 +28,36 @@ public class OAuth2Realm extends AuthorizingRealm {
 
     /**
      * 授权
+     *
      * @param principalCollection
      * @return
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        TbUser user = (TbUser) principalCollection.getPrimaryPrincipal();
+        int userId = user.getId();
+        Set<String> permissionSet = userService.searchUserPermissions(userId);
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+        info.setStringPermissions(permissionSet);
         return info;
     }
 
     /**
      * 认证
+     *
      * @param authenticationToken
      * @return
      * @throws AuthenticationException
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        SimpleAuthenticationInfo info = new SimpleAuthenticationInfo();
+        String token = (String) authenticationToken.getPrincipal();
+        int userId = jwtUtil.getUserId(token);
+        TbUser user = userService.searchById(userId);
+        if (user == null) {
+            throw new LockedAccountException("账号已被锁定， 请联系管理员");
+        }
+        SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(user, token, getName());
         return info;
     }
 }

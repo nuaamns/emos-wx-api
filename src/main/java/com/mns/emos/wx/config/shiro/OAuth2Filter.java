@@ -91,7 +91,7 @@ public class OAuth2Filter extends AuthenticatingFilter {
                 resp.getWriter().print("expired token");
                 return false;
             }
-        } catch (JWTDecodeException e) {
+        } catch (Exception e) {
             resp.setStatus(HttpStatus.SC_UNAUTHORIZED);
             resp.getWriter().print("unauthorized token");
             return false;
